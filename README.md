@@ -1,12 +1,14 @@
 # Job Application Tracker API
 
+[![CI](https://github.com/Ethereall-Pluto/job-tracker-api/actions/workflows/ci.yml/badge.svg)](https://github.com/Ethereall-Pluto/job-tracker-api/actions/workflows/ci.yml)
+
 A small REST API for tracking job applications: log where you applied, update the status
 as recruiters answer, and get a list of applications that need a follow-up
 (no reply after 7 days).
 
 I built it to replace the spreadsheet I use for my own job search.
 
-**Stack:** Python, FastAPI, Pydantic, SQLite, pytest.
+**Stack:** Python, FastAPI, Pydantic, SQLite, pytest, Docker, GitHub Actions.
 
 ## Structure
 
@@ -26,12 +28,23 @@ Design decisions:
 
 ## Run
 
+With Docker:
+
 ```bash
-pip install fastapi uvicorn
+docker build -t job-tracker-api .
+docker run -p 8000:8000 -v tracker-data:/data job-tracker-api
+```
+
+The `tracker-data` volume keeps the database when the container is removed or rebuilt.
+
+Without Docker:
+
+```bash
+pip install -r requirements.txt
 uvicorn tracker.main:app --reload
 ```
 
-Interactive docs: http://localhost:8000/docs
+Interactive docs: http://localhost:8000/docs. The database file defaults to `tracker.db`; set `TRACKER_DB` to put it elsewhere.
 
 ## Endpoints
 
@@ -58,8 +71,10 @@ curl -X POST localhost:8000/applications \
 ## Tests
 
 ```bash
-pip install pytest httpx
+pip install -r requirements-dev.txt
 pytest
 ```
+
+GitHub Actions runs the tests on Python 3.10 and 3.12 on every push, then builds the Docker image, starts it and checks that the API answers.
 
 Requires Python 3.10+.
